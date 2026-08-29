@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oidc-jwks
+data:
+  jwks.json: |
+    {
+      "keys": [
+        {
+          "use": "sig",
+          "kty": "RSA",
+          "kid": "R66D09IMIRmLDbyBPjMrEQRNYnlLuMRgFbwh_JX3MNA",
+          "alg": "RS256",
+          "n": "zH2Tt54PzSpizmPAMNRTp1HW8duWImoDSTyTcIxz6D84c9voXnImI2dGHvUYazmxrcZKqdXutpJBjiz0rhXwct1QM5Tg19ecL1VkX3s3TxRm7N3eHmSPyaEUag0LFQHXEtKcpm4b9pNxeTz_6WSgNg1vWVoDcz7IW2M16itMFLNHdYqVKlqeIjkn4C-kxGYLE4rsbeFmJsQ8hLkDQ_U6Bar11AzCrkQV96bvwIa1ue0ltrUub53yp2TvLa6bhGTx3gxPF51qejLjt-Fg98m7TttQ2MTZIRMdL_ldhThFTj8p2Y4eUerPRrKUQXdJrBDL3ROHVMj9gZ0H9bhxAOmjcw",
+          "e": "AQAB"
+        }
+      ]
+    }

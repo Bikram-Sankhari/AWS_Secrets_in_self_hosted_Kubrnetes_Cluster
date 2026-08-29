@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oidc-nginx-config
+data:
+  default.conf: |
+    server {
+        listen 80;
+
+        location = /.well-known/openid-configuration {
+            alias /usr/share/nginx/html/openid-configuration;
+            default_type application/json;
+        }
+
+        location = /openid/v1/jwks {
+            alias /usr/share/nginx/html/jwks.json;
+            default_type application/json;
+        }
+    }
