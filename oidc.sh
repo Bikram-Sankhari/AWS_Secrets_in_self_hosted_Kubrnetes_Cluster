@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Copy keys from your loal machine to the EC2 instance (if applicable)
-scp -i my-key-pair.pem Docker/K3s_Img/private.key ec2-user@100.30.231.161:~
-scp -i my-key-pair.pem Docker/K3s_Img/public.pub ec2-user@100.30.231.161:~
+scp -i my-key-pair.pem Docker/K3s_Img/private.key ec2-user@<your-ec2-ip>:~
+scp -i my-key-pair.pem Docker/K3s_Img/public.pub ec2-user@<your-ec2-ip>:~
 
 # Get into the instance 
-ssh -i my-key-pair.pem ec2-user@100.30.231.161
+ssh -i my-key-pair.pem ec2-user@<your-ec2-ip>
 
 # Generate RSA key pair for OIDC
 openssl genrsa -out private.key 2048
@@ -16,16 +16,16 @@ curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server \
   --write-kubeconfig-mode 644 \
   --kube-apiserver-arg=service-account-issuer=https://oidc.sankhari.shop \
   --kube-apiserver-arg=service-account-signing-key-file=/home/ec2-user/private.key \
-  --kube-apiserver-arg=service-account-key-file=/home/ec2-user/public.pub \
+  --kube-apiserver-arg=service-account-key-file=/home/ec2-user/public.key \
   --kube-apiserver-arg=api-audiences=sts.amazonaws.com" sh -
 
 # Create Kubernetes Objects
-kubectl apply -f https://raw.githubusercontent.com/BikramSankhari/That-1/refs/heads/Auth_Backend/Kubernetes/oidc/oidc-discovery-configmap.yaml
-kubectl apply -f https://raw.githubusercontent.com/BikramSankhari/That-1/refs/heads/Auth_Backend/Kubernetes/oidc/oidc-jwks-configmap.yaml
-kubectl apply -f https://raw.githubusercontent.com/BikramSankhari/That-1/refs/heads/Auth_Backend/Kubernetes/oidc/oidc-nginx-config.yaml
-kubectl apply -f https://raw.githubusercontent.com/BikramSankhari/That-1/refs/heads/Auth_Backend/Kubernetes/oidc/oidc-nginx-deployment.yaml
-kubectl apply -f https://raw.githubusercontent.com/BikramSankhari/That-1/refs/heads/Auth_Backend/Kubernetes/oidc/oidc-nginx-service.yaml
-kubectl apply -f https://raw.githubusercontent.com/BikramSankhari/That-1/refs/heads/Auth_Backend/Kubernetes/oidc/secretproviderclass.yaml
+kubectl apply -f oidc-discovery-configmap.yaml
+kubectl apply -f oidc-jwks-configmap.yaml
+kubectl apply -f oidc-nginx-config.yaml
+kubectl apply -f oidc-nginx-deployment.yaml
+kubectl apply -f oidc-nginx-service.yaml
+kubectl apply -f secretproviderclass.yaml
 
 # Create webhook for AWS EKS Pod Identity
 sudo yum install git make -y
@@ -52,4 +52,4 @@ helm repo add aws-secrets-manager https://aws.github.io/secrets-store-csi-driver
 helm install -n kube-system secrets-provider-aws aws-secrets-manager/secrets-store-csi-driver-provider-aws
 
 # Finally See it working
-kubectl apply -f https://raw.githubusercontent.com/BikramSankhari/That-1/refs/heads/Auth_Backend/Kubernetes/oidc/secret-test-pod.yaml
+kubectl apply -f secret-test-pod.yaml

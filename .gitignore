@@ -1,2 +1,5 @@
 private.key
 public.key
+*.pem
+
+.venv/
