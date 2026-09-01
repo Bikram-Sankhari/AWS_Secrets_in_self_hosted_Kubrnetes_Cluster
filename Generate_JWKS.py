@@ -4,6 +4,7 @@ import argparse
 import os
 import subprocess
 import sys
+import hashlib
 
 try:
     import cryptography
@@ -32,12 +33,20 @@ def b64url(n):
     b = n.to_bytes((n.bit_length() + 7) // 8, "big")
     return base64.urlsafe_b64encode(b).rstrip(b"=").decode()
 
+n_b64 = b64url(numbers.n)
+e_b64 = b64url(numbers.e)
+
+# RFC 7638 JWK Thumbprint: SHA-256 over a canonical, sorted JSON representation
+canonical = json.dumps({"e": e_b64, "kty": "RSA", "n": n_b64}, separators=(",", ":"), sort_keys=True)
+kid = base64.urlsafe_b64encode(hashlib.sha256(canonical.encode()).digest()).rstrip(b"=").decode()
+
 jwks = json.dumps({
     "keys": [
         {
             "kty": "RSA",
             "use": "sig",
             "alg": "RS256",
+            "kid": kid,
             "n": b64url(numbers.n),
             "e": b64url(numbers.e),
         }

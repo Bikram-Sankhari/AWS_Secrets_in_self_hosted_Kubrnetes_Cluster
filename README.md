@@ -219,7 +219,9 @@ Secret mounted as a file inside the pod
 
   
 
-- An AWS account and a domain you control (for the public OIDC endpoint)
+- An AWS account
+- A domain you control (for the public OIDC endpoint)
+- An SSL Certificate for the domain
 
   
   

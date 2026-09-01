@@ -7,9 +7,15 @@ scp -i my-key-pair.pem Docker/K3s_Img/public.pub ec2-user@<your-ec2-ip>:~
 # Get into the instance 
 ssh -i my-key-pair.pem ec2-user@<your-ec2-ip>
 
+# Install dependencies
+sudo yum install git make python -y
+
 # Generate RSA key pair for OIDC
 openssl genrsa -out private.key 2048
 openssl rsa -in private.key -pubout -out public.key
+
+# Generate JWKS from the public key
+python Generate_JWKS.py --public-key /home/ec2-user/public.key --output public-key.json
 
 # Setup Kubernetes Cluster with OIDC configuration
 curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server \
@@ -25,11 +31,8 @@ kubectl apply -f oidc-jwks-configmap.yaml
 kubectl apply -f oidc-nginx-config.yaml
 kubectl apply -f oidc-nginx-deployment.yaml
 kubectl apply -f oidc-nginx-service.yaml
-kubectl apply -f secretproviderclass.yaml
 
 # Create webhook for AWS EKS Pod Identity
-sudo yum install git make -y
-
 git clone https://github.com/aws/amazon-eks-pod-identity-webhook.git
 
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.21.1/cert-manager.yaml
@@ -51,5 +54,8 @@ export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 helm repo add aws-secrets-manager https://aws.github.io/secrets-store-csi-driver-provider-aws
 helm install -n kube-system secrets-provider-aws aws-secrets-manager/secrets-store-csi-driver-provider-aws
 
+kubectl apply -f secretproviderclass.yaml
+
 # Finally See it working
 kubectl apply -f secret-test-pod.yaml
+kubectl exec -it secret-test-pod -- /bin/bash
