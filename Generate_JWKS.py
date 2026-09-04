@@ -36,9 +36,12 @@ def b64url(n):
 n_b64 = b64url(numbers.n)
 e_b64 = b64url(numbers.e)
 
-# RFC 7638 JWK Thumbprint: SHA-256 over a canonical, sorted JSON representation
-canonical = json.dumps({"e": e_b64, "kty": "RSA", "n": n_b64}, separators=(",", ":"), sort_keys=True)
-kid = base64.urlsafe_b64encode(hashlib.sha256(canonical.encode()).digest()).rstrip(b"=").decode()
+# SHA 256 JWK Thumbprint: SHA-256 over a canonical, sorted JSON representation
+der = public_key.public_bytes(
+    encoding=serialization.Encoding.DER,
+    format=serialization.PublicFormat.SubjectPublicKeyInfo,
+)
+kid = base64.urlsafe_b64encode(hashlib.sha256(der).digest()).rstrip(b"=").decode()
 
 jwks = json.dumps({
     "keys": [
